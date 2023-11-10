@@ -1,0 +1,66 @@
+import requests
+from airflow import DAG
+from airflow.operators.python_operator import PythonOperator
+
+default_args = {
+    "start_date": airflow.utils.dates.days_ago(1)
+}
+
+endpoint = 'http://eiuhu2-addpipd-prode-evgt-consumption-load--01.eventgrind.azure.net/api/events'
+
+key=r'http%3a%2f%2feu-apd-prode-evgt-consumption-load--01.eastus2-1.eventgrid.azure.net%2api%2fevents&e=10%2f19%2f2028+1%a503a54+PM&s=xSqvsrvxyWm9jvHdA2NgUoX1tIh2fz5ertyuir5678fghj'
+
+event ='[
+   {
+    "id": "ArflowRunId",
+    "eventType": "modelRebuuildcomplet",
+    "subject": "US_DAR_MONTHLY_RETAIL_GENMERCH",
+    "eventTime": "%s",
+    "date": {
+     "model": "US_DAR_MONTHLY_RETAIL_GENMERCH",
+     "business": "tech",
+     "datasource": "pos",
+     "frequency": "cet",
+     "data_version": "c12321_ps233487543352_pf23423",
+     "repo": "US_TECH_POS_MONTHLY_RETAIL_GENMERCH_A"
+    },
+    "dataversion": "1.0"
+   }
+  ]'
+
+def send_event_to_eventgrid(event, endpoint, key):
+    """Sends an event to Event Grid.
+
+    Args:
+        event: The event to send.
+        endpoint: The Event Grid endpoint URL.
+        key: The Event Grid shared access signature.
+    """
+
+    headers = {
+        "Authorization": f"sharedAccessSignature {key}"
+    }
+
+    response = requests.post(endpoint, headers=headers, data=event)
+
+    if response.status_code != 200:
+        raise Exception(f"Failed to send event to Event Grid: {response.status_code}")
+
+dag = DAG(
+    "send_event_to_eventgrid",
+    default_args=default_args,
+    schedule_interval="@daily"
+)
+
+send_event_task = PythonOperator(
+    task_id="send_event",
+    python_callable=send_event_to_eventgrid,
+    op_kwargs={
+        "event": event,
+        "endpoint": endpoint,
+        "key": key
+    },
+    dag=dag
+)
+
+send_event_task
