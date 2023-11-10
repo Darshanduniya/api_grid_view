@@ -1,0 +1,57 @@
+import requests
+from airflow import DAG
+from airflow.operators.python_operator import PythonOperator
+
+default_args = {
+    'owner': 'airflow',
+    'start_date': airflow.utils.dates.days_ago(1),
+}
+
+dag = DAG('execute_rest_api', default_args=default_args, schedule_interval='@once')
+
+def execute_rest_api():
+    headers = {
+        'Authorised': 'sharedAccessSignature',
+        'Content-Type': 'application/json',
+    }
+
+    endpoint=https://cvbjhgfghjkl
+	
+    key = 'r=http%3a%2f%2feu-apd-prode-evgt-consumption-load--01.eastus2-1.eventgrid.azure.net%2api%2fevents&e=10%2f19%2f2028+1%a503a54+PM&s=xSqvsrvxyWm9jvHdA2NgUoX1tIh2fz5ertyuir5678fghj'
+
+    event = '''[
+      {
+        "id": "ArflowRunId",
+        "eventType": "modelRebuuildcomplet",
+        "subject": "US_DAR_MONTHLY_RETAIL_GENMERCH",
+        "eventTime": "%s",
+        "date": {
+          "model": "US_DAR_MONTHLY_RETAIL_GENMERCH",
+          "business": "tech",
+          "datasource": "pos",
+          "frequency": "cet",
+          "data_version": "c12321_ps233487543352_pf23423",
+          "repo": "US_TECH_POS_MONTHLY_RETAIL_GENMERCH_A"
+        },
+        "dataversion": "1.0"
+      }
+    ]''' % date.today().strftime('%Y-%m-%dT%H:%M:%S%z')
+
+    payload = {'event': event}
+
+    response = requests.post(endpoint, headers=headers, data=json.dumps(payload))
+
+    if response.status_code != 200:
+        raise Exception('Failed to execute REST API: %s' % response.text)
+
+execute_rest_api_task = PythonOperator(
+    task_id='execute_rest_api',
+    python_callable=execute_rest_api,
+    dag=dag
+)
+
+execute_rest_api_task
+
+
+
+
