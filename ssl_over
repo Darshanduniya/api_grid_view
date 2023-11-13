@@ -1,0 +1,24 @@
+import requests
+from requests.exceptions import SSLError
+
+def fetch_remote_page(url):
+    try:
+        # Try to make a request to the remote page
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad responses (4xx and 5xx)
+
+        # If the request is successful, print the content
+        print(response.text)
+
+    except SSLError as e:
+        # Handle SSL errors
+        print(f"SSL Error: {e}")
+        # Additional SSL error handling can be added here
+
+    except requests.exceptions.RequestException as e:
+        # Handle other types of request errors
+        print(f"Request Error: {e}")
+
+if __name__ == "__main__":
+    url = "https://example.com"  # Replace with the actual URL
+    fetch_remote_page(url)
